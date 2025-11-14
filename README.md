@@ -98,17 +98,9 @@ O worker verifica novas extrações a cada 5 segundos (configurável em `worker.
 
 Para processar múltiplas extrações simultaneamente, cada uma roda em uma thread separada.
 
-## Segurança
 
-- A senha do banco de dados deve ser configurada via variável de ambiente
-- Nunca commite a senha no código
-- Use variáveis de ambiente para todas as credenciais
 
-## Notas
 
-- O processamento pode levar vários minutos dependendo do tamanho da API
-- O worker processa até 5 extrações pendentes por vez
-- Extrações são processadas em ordem de criação (FIFO)
 
 
 
