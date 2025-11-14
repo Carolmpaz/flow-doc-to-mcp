@@ -26,9 +26,7 @@ pip install -r requirements.txt
 ```
 
 3. Configure a variável de ambiente do banco de dados:
-```bash
-export DATABASE_URL='postgresql://postgres.pkcgaqepkhudtgxadmsw:SUA_SENHA@aws-0-us-west-2.pooler.supabase.com:6543/postgres'
-```
+
 
 4. (Opcional) Configure a chave da API Perplexity no backend:
 ```bash
@@ -111,5 +109,6 @@ Para processar múltiplas extrações simultaneamente, cada uma roda em uma thre
 - O processamento pode levar vários minutos dependendo do tamanho da API
 - O worker processa até 5 extrações pendentes por vez
 - Extrações são processadas em ordem de criação (FIFO)
+
 
 
