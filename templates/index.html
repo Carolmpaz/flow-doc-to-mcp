@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>flow - API Extractor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --blue: #0066ff;
+            --blue-light: #00a8ff;
+            --green: #00ff88;
+            --green-light: #00ffaa;
+            --black: #000000;
+            --dark-gray: #0a0a0a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--black);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at top center, rgba(0, 102, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom left, rgba(0, 255, 136, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(0, 168, 255, 0.2) 0%, transparent 50%),
+                linear-gradient(180deg, 
+                    var(--black) 0%,
+                    var(--black) 20%,
+                    rgba(0, 102, 255, 0.1) 40%,
+                    rgba(0, 255, 136, 0.15) 50%,
+                    rgba(0, 168, 255, 0.15) 60%,
+                    rgba(0, 255, 170, 0.1) 80%,
+                    var(--black) 100%
+                );
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(
+                90deg,
+                var(--blue) 0%,
+                var(--blue-light) 25%,
+                var(--green-light) 50%,
+                var(--green) 75%,
+                var(--blue-light) 100%
+            );
+            opacity: 0.15;
+            mask-image: radial-gradient(ellipse 150% 100% at center, transparent 30%, black 70%);
+            -webkit-mask-image: radial-gradient(ellipse 150% 100% at center, transparent 30%, black 70%);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+
+        .logo-text {
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .form-container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                var(--blue),
+                var(--blue-light),
+                var(--green-light),
+                var(--green),
+                var(--blue-light),
+                var(--blue)
+            );
+            background-size: 300% 100%;
+            animation: gradientMove 4s linear infinite;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 300% 50%;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(2deg);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.3s; }
+        .form-group:nth-child(2) { animation-delay: 0.4s; }
+        .form-group:nth-child(3) { animation-delay: 0.5s; }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            padding-left: 12px;
+        }
+
+        label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(180deg, var(--blue), var(--green));
+            border-radius: 2px;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="url"]:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        input[type="text"]:hover,
+        input[type="url"]:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--blue), var(--blue-light), var(--green-light), var(--green));
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: gradientShift 4s ease infinite;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .output-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            display: none;
+        }
+
+        .output-container.show {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .output-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .output-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 2.5rem;
+            }
+
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="gradient-overlay"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M55.6363 11.6875C55.6363 18.1423 50.4037 23.375 43.9488 23.375C37.494 23.375 32.2613 18.1423 32.2613 11.6875C32.2613 5.23267 37.494 0 43.9488 0C50.4037 0 55.6363 5.23267 55.6363 11.6875Z" fill="white"/>
+                        <path d="M77.776 37.9653C72.186 41.1927 65.038 39.2774 61.8106 33.6873C58.5832 28.0973 60.4985 20.9493 66.0885 17.7219C71.6786 14.4945 78.8266 16.4098 82.054 21.9998C85.2814 27.5899 83.3661 34.7379 77.776 37.9653Z" fill="white"/>
+                        <path d="M5.84372 65.9998C9.07113 71.5899 16.2191 73.5052 21.8091 70.2778C27.3992 67.0504 29.3145 59.9024 26.0871 54.3123C22.8597 48.7223 15.7117 46.807 10.1216 50.0344C4.5316 53.2618 2.61631 60.4098 5.84372 65.9998Z" fill="white"/>
+                        <path d="M77.776 50.0347C72.186 46.8073 65.038 48.7226 61.8106 54.3127C58.5832 59.9027 60.4985 67.0507 66.0885 70.2781C71.6786 73.5055 78.8266 71.5902 82.054 66.0002C85.2814 60.4101 83.3661 53.2621 77.776 50.0347Z" fill="white"/>
+                        <path d="M21.8092 17.722C16.2191 14.4946 9.07115 16.4099 5.84373 21.9999C2.61632 27.59 4.53161 34.7379 10.1217 37.9654C13.7059 40.0347 17.9307 39.9898 21.3518 38.2176C23.7287 36.9863 26.6329 36.3124 28.9512 37.6509L29.7456 38.1095C31.5204 39.1342 32.2614 41.263 32.2614 43.3123C32.2614 47.2963 34.2548 50.8147 37.2986 52.9246C39.3945 54.3774 41.25 56.4879 41.25 59.0381V60.5865C41.25 63.1366 39.3945 65.2472 37.2986 66.7C34.2548 68.8098 32.2614 72.3283 32.2614 76.3123C32.2614 82.7671 37.494 87.9998 43.9489 87.9998C50.4037 87.9998 55.6364 82.7671 55.6364 76.3123C55.6364 72.3515 53.6661 68.8509 50.6523 66.7371C48.5797 65.2834 46.75 63.1831 46.75 60.6515V58.9731C46.75 56.4415 48.5797 54.3412 50.6523 52.8875C53.6661 50.7737 55.6364 47.2731 55.6364 43.3123C55.6364 36.8575 50.4037 31.6248 43.9489 31.6248C42.2052 31.6248 40.5508 32.0066 39.0645 32.6912C36.7838 33.7418 34.0761 34.2589 31.9014 33.0033L30.8741 32.4102C28.7922 31.2082 27.8648 28.759 27.5608 26.3744C27.115 22.877 25.0981 19.6209 21.8092 17.722Z" fill="white"/>
+                    </svg>
+                </div>
+                <h1 class="logo-text">flow</h1>
+            </div>
+            <p class="subtitle">API Extractor & MCP Generator</p>
+        </div>
+
+        <div class="form-container">
+            <form id="extractorForm">
+                <div class="form-group">
+                    <label for="startUrl">URL da Documentação da API</label>
+                    <input 
+                        type="url" 
+                        id="startUrl" 
+                        name="startUrl" 
+                        placeholder="https://docs.github.com/en/rest"
+                        required
+                    >
+                    <div class="help-text">URL base da documentação da API que será extraída</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="toolName">Nome da Ferramenta MCP</label>
+                    <input 
+                        type="text" 
+                        id="toolName" 
+                        name="toolName" 
+                        placeholder="GitHub, MyAPI, etc."
+                        value="MyAPI"
+                    >
+                    <div class="help-text">Nome que será usado para identificar a ferramenta MCP gerada</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiBaseUrl">URL Base da API</label>
+                    <input 
+                        type="url" 
+                        id="apiBaseUrl" 
+                        name="apiBaseUrl" 
+                        placeholder="https://api.github.com"
+                        required
+                    >
+                    <div class="help-text">URL base da API que será usada nas requisições</div>
+                </div>
+
+                <button type="submit" class="submit-btn">Gerar MCP Server</button>
+            </form>
+
+            <div id="outputContainer" class="output-container">
+                <div class="output-title">Resultado:</div>
+                <div id="outputContent" class="output-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('extractorForm');
+        const outputContainer = document.getElementById('outputContainer');
+        const outputContent = document.getElementById('outputContent');
+
+        let pollingInterval = null;
+        let currentExtractionId = null;
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function startPolling(extractionId) {
+            currentExtractionId = extractionId;
+            stopPolling();
+            
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/extraction/${extractionId}`);
+                    if (response.ok) {
+                        const result = await response.json();
+                        const extraction = result.extraction;
+                        
+                        updateStatusDisplay(extraction);
+                        
+                        if (extraction.status === 'completed' || extraction.status === 'failed') {
+                            stopPolling();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                }
+            }, 2000);
+        }
+
+        function updateStatusDisplay(extraction) {
+            const status = extraction.status;
+            const statusMessages = {
+                'pending': '⏳ Aguardando processamento...',
+                'processing': '🔄 Processando extração...',
+                'completed': '✅ Concluído!',
+                'failed': '❌ Falhou'
+            };
+
+            let message = statusMessages[status] || status;
+            message += `\n\nID: ${extraction.id}`;
+            message += `\nStatus: ${status}`;
+            
+            if (extraction.output_path) {
+                message += `\n\nCaminho: ${extraction.output_path}`;
+            }
+            
+            if (extraction.error_message) {
+                message += `\n\nErro: ${extraction.error_message}`;
+            }
+            
+            if (extraction.endpoint_count) {
+                message += `\n\nEndpoints encontrados: ${extraction.endpoint_count}`;
+            }
+            
+            if (extraction.created_at) {
+                message += `\n\nCriado em: ${new Date(extraction.created_at).toLocaleString('pt-BR')}`;
+            }
+            
+            if (extraction.processed_at) {
+                message += `\nProcessado em: ${new Date(extraction.processed_at).toLocaleString('pt-BR')}`;
+            }
+
+            outputContent.textContent = message;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {
+                startUrl: formData.get('startUrl'),
+                toolName: formData.get('toolName') || 'MyAPI',
+                apiBaseUrl: formData.get('apiBaseUrl')
+            };
+
+            if (!data.startUrl || !data.apiBaseUrl) {
+                alert('Por favor, preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            outputContainer.classList.add('show');
+            outputContent.textContent = 'Enviando requisição...';
+
+            try {
+                const response = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    outputContent.textContent = `✅ ${result.message}\n\nID da Extração: ${result.extraction_id}\n\nAguardando processamento...`;
+                    
+                    if (result.extraction_id) {
+                        startPolling(result.extraction_id);
+                    }
+                } else {
+                    const error = await response.json();
+                    outputContent.textContent = `❌ Erro: ${error.error || 'Erro desconhecido'}`;
+                }
+            } catch (error) {
+                outputContent.textContent = `❌ Erro de conexão: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
