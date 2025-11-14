@@ -1,0 +1,16 @@
+{
+  "servers": [
+    {
+      "name": "github",
+      "path": "C:\\Users\\Inteli\\Desktop\\adapta\\mcp_servers_20251113_232822\\github\\server.py",
+      "directory": "C:\\Users\\Inteli\\Desktop\\adapta\\mcp_servers_20251113_232822\\github",
+      "timestamp": "mcp_servers_20251113_232822"
+    },
+    {
+      "name": "spotify",
+      "path": "C:\\Users\\Inteli\\Desktop\\adapta\\mcp_servers_20251114_081403\\spotify\\server.py",
+      "directory": "C:\\Users\\Inteli\\Desktop\\adapta\\mcp_servers_20251114_081403\\spotify",
+      "timestamp": "mcp_servers_20251114_081403"
+    }
+  ]
+}

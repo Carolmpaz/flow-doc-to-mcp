@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mcp-gateway:
+    build: .
+    container_name: mcp-gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mcp_servers:/app/mcp_servers
+      - ./mcp_registry.json:/app/mcp_registry.json
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
+      - MCP_GATEWAY_PORT=8000
+    command: python gateway_server.py
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+  flow-app:
+    build: .
+    container_name: flow-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mcp_servers:/app/mcp_servers
+      - ./templates:/app/templates
+      - ./database.py:/app/database.py
+      - ./worker.py:/app/worker.py
+      - ./app.py:/app/app.py
+      - ./main.py:/app/main.py
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+      - FLASK_ENV=production
+    command: python app.py
+    depends_on:
+      - mcp-gateway
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
+
